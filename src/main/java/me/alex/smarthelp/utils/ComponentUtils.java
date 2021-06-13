@@ -22,7 +22,7 @@ public class ComponentUtils {
         this.maxSuggestions = maxSuggestions;
     }
 
-    public Component getComponentMessage(HashMap<Integer, String> hashMap) {
+    public TextComponent getComponentMessage(HashMap<Integer, String> hashMap) {
         List<Template> plcLList = new ArrayList<>();
         AtomicInteger nearest = new AtomicInteger(1);
         LinkedHashTreeMap<Integer, String> linkedHashTreeMap = new LinkedHashTreeMap<>(Comparator.comparingInt(o -> o));
@@ -32,9 +32,9 @@ public class ComponentUtils {
         mainComponent.append(MiniMessage.get().parse("\n<gray>Did you mean any of these?</gray> "));
 
         if (linkedHashTreeMap.isEmpty())
-            return mainComponent.append(MiniMessage.get().parse("\n<gray>- <red>We did not find any close Results</red>")).asComponent();
+            return mainComponent.append(MiniMessage.get().parse("\n<gray>- <red>We did not find any close Results</red>")).build();
         if (linkedHashTreeMap.keySet().stream().noneMatch(integer -> integer > similarityInt))
-            return mainComponent.append(MiniMessage.get().parse("\n<gray>- <red>We found no similar Results</red>")).asComponent();
+            return mainComponent.append(MiniMessage.get().parse("\n<gray>- <red>We found no similar Results</red>")).build();
 
 
         linkedHashTreeMap.entrySet().stream().limit(maxSuggestions).forEach(integerStringEntry -> {
@@ -50,6 +50,6 @@ public class ComponentUtils {
         });
 
 
-        return mainComponent.asComponent();
+        return mainComponent.build();
     }
 }

@@ -3,6 +3,7 @@ package me.alex.smarthelp.listeners;
 import me.alex.smarthelp.SmartHelp;
 import me.alex.smarthelp.utils.ComponentUtils;
 import me.alex.smarthelp.utils.MathUtils;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,10 +14,14 @@ public class CommandProcessEvent implements Listener {
 
     private final MathUtils mathUtils;
     private final ComponentUtils componentUtils;
+    private final BukkitAudiences bukkitAudiences;
+    private final SmartHelp smartHelp;
 
     public CommandProcessEvent(SmartHelp smartHelp) {
+        this.bukkitAudiences = smartHelp.getBukkitAudiences();
         this.componentUtils = smartHelp.getComponentUtils();
         this.mathUtils = smartHelp.getMathUtils();
+        this.smartHelp = smartHelp;
         smartHelp.getServer().getPluginManager().registerEvents(this, smartHelp);
     }
 
@@ -29,7 +34,7 @@ public class CommandProcessEvent implements Listener {
         HelpTopic helpTopic = Bukkit.getServer().getHelpMap().getHelpTopic(command);
         if (helpTopic == null) {
             event.setCancelled(true);
-            event.getPlayer().sendMessage(componentUtils.getComponentMessage(mathUtils.getBestResult(command, Bukkit.getCommandMap().getKnownCommands().keySet())));
+            bukkitAudiences.player(event.getPlayer()).sendMessage(componentUtils.getComponentMessage(mathUtils.getBestResult(command, smartHelp.getCommands())));
         }
     }
 

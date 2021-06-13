@@ -1,19 +1,21 @@
 package me.alex.smarthelp.utils;
 
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.List;
 
 public class MathUtils {
 
     public MathUtils() {
     }
 
-    public HashMap<Integer, String> getBestResult(String x, @NotNull Set<String> objects) {
+    public HashMap<Integer, String> getBestResult(String x, @NotNull List<String> objects) {
         HashMap<Integer, String> hashMap = new HashMap<>();
         objects.forEach(y -> {
+            Bukkit.getServer().getLogger().info(y);
             int[][] dp = new int[x.length() + 1][y.length() + 1];
 
             for (int i = 0; i <= x.length(); i++) {
