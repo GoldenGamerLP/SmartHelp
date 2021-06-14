@@ -21,9 +21,7 @@ public final class SmartHelp extends JavaPlugin {
 
 
     private final File file = new File(this.getDataFolder().getAbsolutePath() + "//configuration.yml");
-    private YamlConfiguration yamlConfiguration;
     private final MathUtils mathUtils = new MathUtils();
-    private YamlConfiguration yamlConfiguration;
     private ComponentUtils componentUtils;
     private int maxsuggestions;
     private int similarity;
@@ -60,6 +58,7 @@ public final class SmartHelp extends JavaPlugin {
     }
 
     private void createLoadAndSetConfig() {
+        YamlConfiguration yamlConfiguration;
         if (!file.exists()) {
             try {
                 file.mkdir();
@@ -67,7 +66,7 @@ public final class SmartHelp extends JavaPlugin {
             } catch (IOException e) {
                 this.getLogger().info(ChatColor.LIGHT_PURPLE + e.fillInStackTrace().getLocalizedMessage() + String.format("[%s]", this.getDataFolder().getAbsolutePath()));
             } finally {
-                this.yamlConfiguration = YamlConfiguration.loadConfiguration(file);
+                yamlConfiguration = YamlConfiguration.loadConfiguration(file);
                 yamlConfiguration.set("smarthelp.values.similarity", 3);
                 yamlConfiguration.set("smarthelp.values.maxsuggestions", 5);
                 this.getLogger().info("Config was loaded!");
@@ -79,14 +78,14 @@ public final class SmartHelp extends JavaPlugin {
                 } finally {
                     maxsuggestions = yamlConfiguration.getInt("smarthelp.values.maxsuggestions");
                     similarity = yamlConfiguration.getInt("smarthelp.values.similarity");
-                    this.getLogger().info(String.format("Config was redden and saved! [%o,%o]", maxsuggestions, similarity));
+                    this.getLogger().info(String.format("Config was read and saved! [%o,%o]", maxsuggestions, similarity));
                 }
             }
         } else {
-            this.yamlConfiguration = YamlConfiguration.loadConfiguration(file);
+            yamlConfiguration = YamlConfiguration.loadConfiguration(file);
             maxsuggestions = yamlConfiguration.getInt("smarthelp.values.maxsuggestions");
             similarity = yamlConfiguration.getInt("smarthelp.values.similarity");
-            this.getLogger().info(String.format("Config was redden and saved! [%o,%o]", maxsuggestions, similarity));
+            this.getLogger().info(String.format("Config was read and saved! [%o,%o]", maxsuggestions, similarity));
         }
     }
 
@@ -96,11 +95,6 @@ public final class SmartHelp extends JavaPlugin {
             bukkitAudiences.close();
             bukkitAudiences = null;
         }
-    }
-
-    @Override
-    public void onDisable() {
-        // Plugin shutdown logic
     }
 
     public MathUtils getMathUtils() {
