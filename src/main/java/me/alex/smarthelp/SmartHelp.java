@@ -21,6 +21,7 @@ public final class SmartHelp extends JavaPlugin {
 
 
     private final File file = new File(this.getDataFolder().getAbsolutePath() + "//configuration.yml");
+    private YamlConfiguration yamlConfiguration;
     private final MathUtils mathUtils = new MathUtils();
     private YamlConfiguration yamlConfiguration;
     private ComponentUtils componentUtils;
@@ -95,6 +96,11 @@ public final class SmartHelp extends JavaPlugin {
             bukkitAudiences.close();
             bukkitAudiences = null;
         }
+    }
+
+    @Override
+    public void onDisable() {
+        // Plugin shutdown logic
     }
 
     public MathUtils getMathUtils() {
