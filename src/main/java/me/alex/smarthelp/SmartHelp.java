@@ -3,28 +3,23 @@ package me.alex.smarthelp;
 import me.alex.smarthelp.listeners.CommandProcessEvent;
 import me.alex.smarthelp.utils.ComponentUtils;
 import me.alex.smarthelp.utils.MathUtils;
+import me.alex.smarthelp.utils.configuration.ConfigManager;
+import me.alex.smarthelp.utils.configuration.ConfigValues;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
 import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public final class SmartHelp extends JavaPlugin {
 
-
-    private final File file = new File(this.getDataFolder().getAbsolutePath() + "//configuration.yml");
     private final MathUtils mathUtils = new MathUtils();
+    private final ConfigManager configManager = new ConfigManager(this, "config.yml");
     private ComponentUtils componentUtils;
-    private int maxsuggestions;
-    private int similarity;
     private BukkitAudiences bukkitAudiences;
     private List<String> commands;
 
@@ -34,9 +29,11 @@ public final class SmartHelp extends JavaPlugin {
         createLoadAndSetConfig();
         this.bukkitAudiences = BukkitAudiences.create(this);
 
-        this.componentUtils = new ComponentUtils(similarity, maxsuggestions);
-        this.commands = new SimpleCommandMap(this.getServer()).getCommands().stream().map(Command::getName).collect(Collectors.toList());
+        this.componentUtils = new ComponentUtils(configManager);
+        this.componentUtils.load();
+
         new CommandProcessEvent(this);
+
         getAllCommands();
     }
 
@@ -52,41 +49,20 @@ public final class SmartHelp extends JavaPlugin {
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 getLogger().info(e.fillInStackTrace().getLocalizedMessage());
             } finally {
-                getLogger().info("Found %commands% Commands registered".replace("%commands%", commands.size() + ""));
+                getLogger().info(ChatColor.GREEN + "Found %commands% Commands registered".replace("%commands%", commands.size() + ""));
             }
         }, 55);
     }
 
     private void createLoadAndSetConfig() {
-        YamlConfiguration yamlConfiguration;
-        if (!file.exists()) {
-            try {
-                file.mkdir();
-                file.createNewFile();
-            } catch (IOException e) {
-                this.getLogger().info(ChatColor.LIGHT_PURPLE + e.fillInStackTrace().getLocalizedMessage() + String.format("[%s]", this.getDataFolder().getAbsolutePath()));
-            } finally {
-                yamlConfiguration = YamlConfiguration.loadConfiguration(file);
-                yamlConfiguration.set("smarthelp.values.similarity", 3);
-                yamlConfiguration.set("smarthelp.values.maxsuggestions", 5);
-                this.getLogger().info("Config was loaded!");
+        this.configManager.createFile();
+        this.configManager.loadConfig();
 
-                try {
-                    yamlConfiguration.save(file);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    maxsuggestions = yamlConfiguration.getInt("smarthelp.values.maxsuggestions");
-                    similarity = yamlConfiguration.getInt("smarthelp.values.similarity");
-                    this.getLogger().info(String.format("Config was read and saved! [%o,%o]", maxsuggestions, similarity));
-                }
-            }
-        } else {
-            yamlConfiguration = YamlConfiguration.loadConfiguration(file);
-            maxsuggestions = yamlConfiguration.getInt("smarthelp.values.maxsuggestions");
-            similarity = yamlConfiguration.getInt("smarthelp.values.similarity");
-            this.getLogger().info(String.format("Config was read and saved! [%o,%o]", maxsuggestions, similarity));
+        for (ConfigValues value : ConfigValues.values()) {
+            this.configManager.saveDefaultValues(value);
         }
+
+        this.configManager.saveFile();
     }
 
     @Override

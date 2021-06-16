@@ -30,6 +30,11 @@ public class CommandProcessEvent implements Listener {
     public void onCommand(PlayerCommandPreprocessEvent event) {
         if (event.isCancelled()) return;
         if (event.getMessage().isEmpty()) return;
+        if(smartHelp.getCommands() == null) {
+            event.setCancelled(true);
+            event.getPlayer().sendMessage("§7[§aSmartHelp§7] Please wait - plugin isn't yet ready!");
+            return;
+        }
 
         String command = event.getMessage().split(" ")[0].toLowerCase();
         HelpTopic helpTopic = Bukkit.getServer().getHelpMap().getHelpTopic(command);

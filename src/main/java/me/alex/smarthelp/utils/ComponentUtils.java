@@ -1,6 +1,8 @@
 package me.alex.smarthelp.utils;
 
 import com.google.gson.internal.LinkedHashTreeMap;
+import me.alex.smarthelp.utils.configuration.ConfigManager;
+import me.alex.smarthelp.utils.configuration.ConfigValues;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -14,12 +16,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ComponentUtils {
 
-    private final int similarityInt;
-    private final int maxSuggestions;
+    private final ConfigManager configManager;
+    private int similarityInt;
+    private int maxSuggestions;
+    private String messageTitle;
+    private String noResults;
+    private String noSimilarResults;
+    private String commandListingFormat;
 
-    public ComponentUtils(int similarity, int maxSuggestions) {
-        this.similarityInt = similarity;
-        this.maxSuggestions = maxSuggestions;
+    public ComponentUtils(ConfigManager configManager) {
+        this.configManager = configManager;
+    }
+
+    public void load() {
+        this.similarityInt = (int) configManager.loadAndGet(ConfigValues.SIMILARITY_TRESHHOLD);
+        this.maxSuggestions = (int) configManager.loadAndGet(ConfigValues.MAX_SUGGESTIONS);
+        this.messageTitle = (String) configManager.loadAndGet(ConfigValues.UNKNOWNCOMMAND_TITLE);
+        this.noResults = (String) configManager.loadAndGet(ConfigValues.UNKNOWNCOMMAND_NORESULTS);
+        this.noSimilarResults = (String) configManager.loadAndGet(ConfigValues.UNKNOWNCOMMAND_NOSIMILARRESULTS);
+        this.commandListingFormat = (String) configManager.loadAndGet(ConfigValues.COMMAND_LISTING);
     }
 
     public TextComponent getComponentMessage(HashMap<Integer, String> hashMap) {
@@ -27,14 +42,12 @@ public class ComponentUtils {
         AtomicInteger nearest = new AtomicInteger(1);
         LinkedHashTreeMap<Integer, String> linkedHashTreeMap = new LinkedHashTreeMap<>(Comparator.comparingInt(o -> o));
         linkedHashTreeMap.putAll(hashMap);
-        TextComponent.Builder mainComponent = Component.text().append(MiniMessage.get().parse("<red>That Command does not Exists!</red> <hover:show_text:'<gray>Found <gold><commands></gold> Commands \n <blue>Hover over commands for more Information</blue>'><gradient:green:blue>(Help)</gradient> \n", Template.of("commands", hashMap.size() + "")));
-
-        mainComponent.append(MiniMessage.get().parse("\n<gray>Did you mean any of these?</gray> "));
+        TextComponent.Builder mainComponent = Component.text().append(MiniMessage.get().parse(messageTitle, Template.of("commands", hashMap.size() + "")));
 
         if (linkedHashTreeMap.isEmpty())
-            return mainComponent.append(MiniMessage.get().parse("\n<gray>- <red>We did not find any close Results</red>")).build();
+            return mainComponent.append(MiniMessage.get().parse(noResults)).build();
         if (linkedHashTreeMap.keySet().stream().noneMatch(integer -> integer > similarityInt))
-            return mainComponent.append(MiniMessage.get().parse("\n<gray>- <red>We found no similar Results</red>")).build();
+            return mainComponent.append(MiniMessage.get().parse(noSimilarResults)).build();
 
 
         linkedHashTreeMap.entrySet().stream().limit(maxSuggestions).forEach(integerStringEntry -> {
@@ -46,7 +59,7 @@ public class ComponentUtils {
             plcLList.add(Template.of("place", nearest.getAndIncrement() + ""));
             plcLList.add(Template.of("command", "/" + command));
 
-            mainComponent.append(MiniMessage.get().parse("\n<gray>| <gold><bold><font:minecraft:uniform><place></font></bold> <click:suggest_command:<command>><hover:show_text:'<gray>Click here to insert the Command <gold><command></gold> <gray>(<green><percentage><gray>)</gray> '><gradient:#5e4fa2:#f79459:red><command></gradient></click>", plcLList));
+            mainComponent.append(MiniMessage.get().parse(commandListingFormat, plcLList));
         });
 
 
