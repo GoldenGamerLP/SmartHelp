@@ -47,7 +47,8 @@ public class ConfigManager {
     }
 
     public void saveDefaultValues(ConfigValues values) {
-        if(this.yamlConfiguration.get(values.getConfigPath()) == null) this.yamlConfiguration.set(values.getConfigPath(), values.getValue());
+        if (this.yamlConfiguration.get(values.getConfigPath()) == null)
+            this.yamlConfiguration.set(values.getConfigPath(), values.getValue());
     }
 
     public void saveFile() {

@@ -3,25 +3,28 @@ package me.alex.smarthelp;
 import me.alex.smarthelp.listeners.CommandProcessEvent;
 import me.alex.smarthelp.utils.ComponentUtils;
 import me.alex.smarthelp.utils.MathUtils;
+import me.alex.smarthelp.utils.Utils;
 import me.alex.smarthelp.utils.configuration.ConfigManager;
 import me.alex.smarthelp.utils.configuration.ConfigValues;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class SmartHelp extends JavaPlugin {
 
     private final MathUtils mathUtils = new MathUtils();
     private final ConfigManager configManager = new ConfigManager(this, "config.yml");
+    private final Utils utils = new Utils(this);
     private ComponentUtils componentUtils;
     private BukkitAudiences bukkitAudiences;
-    private List<String> commands;
+    private Set<Command> commands;
 
     @Override
     public void onEnable() {
@@ -45,9 +48,9 @@ public final class SmartHelp extends JavaPlugin {
                 SimpleCommandMap commandMap = (SimpleCommandMap) bukkitCommandMap.get(Bukkit.getServer());
 
                 // do stuff with commandMap
-                commands = commandMap.getCommands().stream().map(command -> command.getLabel().trim()).filter(s -> !s.isEmpty()).distinct().collect(Collectors.toList());
+                commands = commandMap.getCommands().stream().distinct().collect(Collectors.toSet());
             } catch (NoSuchFieldException | IllegalAccessException e) {
-                getLogger().info(e.fillInStackTrace().getLocalizedMessage());
+                getLogger().info(ChatColor.RED + e.fillInStackTrace().getLocalizedMessage());
             } finally {
                 getLogger().info(ChatColor.GREEN + "Found %commands% Commands registered".replace("%commands%", commands.size() + ""));
             }
@@ -88,7 +91,11 @@ public final class SmartHelp extends JavaPlugin {
         return this.bukkitAudiences;
     }
 
-    public List<String> getCommands() {
+    public Set<Command> getCommands() {
         return commands;
+    }
+
+    public Utils getUtils() {
+        return utils;
     }
 }
